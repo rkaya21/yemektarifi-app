@@ -4,6 +4,7 @@ Tests for models
 
 from decimal import Decimal
 from typing import Any
+from unittest.mock import patch
 
 from core import models
 from django.contrib.auth import get_user_model
@@ -86,3 +87,21 @@ class ModelTests(TestCase):
         self.assertEqual(str(tag), tag.name)
         self.assertIsNotNone(tag.created_at)
         self.assertIsNotNone(tag.updated_at)
+
+    def test_create_ingredient(self) -> None:
+        """Test creating an ingredient is successful."""
+        user = create_user()
+        ingredient = models.Ingredient.objects.create(user=user, name="Salt")
+
+        self.assertEqual(str(ingredient), ingredient.name)
+        self.assertIsNotNone(ingredient.created_at)
+        self.assertIsNotNone(ingredient.updated_at)
+
+    @patch("core.models.uuid.uuid4")
+    def test_recipe_file_name_uuid(self, mock_uuid: Any) -> None:
+        """Test generating image path with a UUID filename."""
+        uuid = "test-uuid"
+        mock_uuid.return_value = uuid
+        file_path = models.recipe_image_file_path(None, "example.jpg")
+
+        self.assertEqual(file_path, f"uploads/recipe/{uuid}.jpg")
