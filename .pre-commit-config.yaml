@@ -27,6 +27,8 @@ repos:
         additional_dependencies:
         - django
         - djangorestframework
+        - django-cors-headers
+        - django-filter
         - drf-spectacular
         - django-stubs
         - types-requests
