@@ -4,6 +4,8 @@
 Database models.
 """
 
+import os
+import uuid
 from typing import Any, Optional
 
 from django.conf import settings
@@ -13,6 +15,14 @@ from django.contrib.auth.models import (
     PermissionsMixin,
 )
 from django.db import models
+
+
+def recipe_image_file_path(instance: Any, filename: str) -> str:
+    """Generate file path for a new recipe image."""
+    ext = os.path.splitext(filename)[1]
+    filename = f"{uuid.uuid4()}{ext}"
+
+    return os.path.join("uploads", "recipe", filename)
 
 
 class UserManager(BaseUserManager["User"]):
@@ -66,8 +76,12 @@ class Recipe(models.Model):
     price = models.DecimalField(max_digits=5, decimal_places=2)
     link = models.CharField(max_length=255, blank=True)
     tags: "models.ManyToManyField[Tag, Recipe]" = models.ManyToManyField("Tag")
+    ingredients: "models.ManyToManyField[Ingredient, Recipe]" = models.ManyToManyField(
+        "Ingredient"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    image = models.ImageField(null=True, upload_to=recipe_image_file_path)
 
     def __str__(self) -> str:
         return str(self.title)
@@ -75,6 +89,21 @@ class Recipe(models.Model):
 
 class Tag(models.Model):
     """Tag for filtering recipes."""
+
+    name = models.CharField(max_length=255)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return str(self.name)
+
+
+class Ingredient(models.Model):
+    """Ingredient for recipes."""
 
     name = models.CharField(max_length=255)
     user = models.ForeignKey(
