@@ -332,6 +332,22 @@ class PrivateRecipeApiTests(TestCase):
         self.assertEqual(res.data["count"], 1)  # type: ignore[index]
         self.assertEqual(res.data["results"], serializer.data)  # type: ignore[index]
 
+    def test_filter_recipes_by_ingredients(self) -> None:
+        """Test filtering recipes by ingredient."""
+        recipe1 = create_recipe(user=self.user, title="Recipe 1")
+        recipe2 = create_recipe(user=self.user, title="Recipe 2")
+        ingredient1 = Ingredient.objects.create(user=self.user, name="Feta")
+        ingredient2 = Ingredient.objects.create(user=self.user, name="Chicken")
+        recipe1.ingredients.add(ingredient1)
+        recipe2.ingredients.add(ingredient2)
+
+        res = self.client.get(RECIPES_URL, {"ingredients": ingredient1.id})
+
+        serializer = RecipeSerializer([recipe1], many=True)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data["count"], 1)  # type: ignore[index]
+        self.assertEqual(res.data["results"], serializer.data)  # type: ignore[index]
+
     def test_search_recipes(self) -> None:
         """Test searching recipes by title and description."""
         recipe1 = create_recipe(

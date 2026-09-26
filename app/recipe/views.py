@@ -28,7 +28,7 @@ class RecipeViewSet(viewsets.ModelViewSet[Recipe]):  # type: ignore[misc]
         filters.SearchFilter,
         filters.OrderingFilter,
     ]
-    filterset_fields = ["tags"]
+    filterset_fields = ["tags", "ingredients"]
     search_fields = ["title", "description"]
     ordering_fields = ["id", "title", "time_minutes", "price"]
 
